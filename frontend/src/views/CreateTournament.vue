@@ -4,45 +4,27 @@ import axiosInstance from "@/api/axiosInstance";
 import { useAuthStore } from "@/stores";
 import { useRouter } from "vue-router";
 
-const loginRequest = ref({
-  email: "",
-  password: "",
+const CreateTournamentRequest = ref({
+  name: "",
+  sport: "",
+  tournamentType: ""
 });
 const errorMessage = ref("");
 const sessionExpired = ref(false);
 const authStore = useAuthStore();
 const router = useRouter();
 
-async function login() {
+async function createTournament() {
   try {
     // reset the error message
     clearMessages();
 
-    // send the login request to the server
+    // send the tournament creation request to the server
     const response = await axiosInstance.post(
-      "auth/authenticate", // the endpoint
-      loginRequest.value, // the request body
-       { withCredentials: true },
+      "tournament/create", // the endpoint
+      createTournamentRequest.value, // the request body
+       { withCredentials: false },
     );
-
-    // get the token from the response
-    const accessToken = response.data.access_token;
-    const refreshToken = response.data.refresh_token;
-
-    // set the token in local storage
-    localStorage.setItem("access_token", accessToken);
-    localStorage.setItem("refresh_token", refreshToken);
-
-    // update the authorization header
-    axiosInstance.defaults.headers.common[
-      "Authorization"
-    ] = `Bearer ${accessToken}`;
-
-    // extract the user role from the token
-    const userRole = extractUserRoleFromToken(accessToken);
-
-    // call the stores login method this will update the stores state
-    authStore.login(userRole);
 
     // redirect to the home page
     await router.push("/");
@@ -107,12 +89,13 @@ if (router.currentRoute.value.query.sessionExpired) {
                 class="shadow form-control"
                 v-model="loginRequest.email"
                 required="required"
-                type="email"
+                type=""
                 name="email"
                 placeholder="Email"
               />
             </div>
-            <div class="mb-3">
+            
+			<div class="mb-3">
               <input
                 class="shadow form-control"
                 v-model="loginRequest.password"
